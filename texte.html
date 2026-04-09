@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Text Styler - Outil de Prévisualisation</title>
+    <style>
+        /* ===== RESET & BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6c63ff;
+            --primary-dark: #5a52d5;
+            --secondary: #ff6584;
+            --accent: #43e97b;
+            --dark: #1a1a2e;
+            --darker: #16213e;
+            --card: #0f3460;
+            --text: #e0e0e0;
+            --text-muted: #a0a0b0;
+            --bg: #1a1a2e;
+            --bg-light: #2a2a40;
+            --border: #2d3148;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: linear-gradient(135deg, var(--darker) 0%, var(--card) 100%);
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 2px solid var(--primary);
+            box-shadow: 0 4px 20px rgba(108, 99, 255, 0.2);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .logo-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 300;
+        }
+
+        /* ===== MAIN CONTENT ===== */
+        .container {
+            display: flex;
+            flex: 1;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ===== CONTROLS PANEL ===== */
+        .controls {
+            width: 350px;
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+        }
+
+        .controls-section {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1rem;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 0.6rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .range-control {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        input[type="range"] {
+            flex: 1;
+        }
+
+        .range-value {
+            min-width: 40px;
+            text-align: right;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .btn-reset:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* ===== PREVIEW PANEL ===== */
+        .preview {
+            flex: 1;
+            background: var(--bg-light);
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .preview-header {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        .preview-content {
+            flex: 1;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .sample-text {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+
+        /* Special preview elements */
+        .hanging-preview {
+            border-left: 2px solid var(--primary);
+            padding-left: 1rem;
+            margin-left: -1rem;
+        }
+
+        .hyphen-preview {
+            max-width: 300px;
+            border: 1px dashed var(--border);
+            padding: 1rem;
+        }
+
+        .tab-preview {
+            white-space: pre;
+            font-family: monospace;
+        }
+
+        .overflow-preview {
+            max-width: 200px;
+            border: 1px solid var(--border);
+            padding: 1rem;
+            word-break: break-all;
+        }
+
+        /* ===== CODE PANEL ===== */
+        .code-panel {
+            margin-top: 1.5rem;
+            background: var(--bg);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: #a8d8ea;
+            overflow-x: auto;
+        }
+
+        .code-line {
+            margin-bottom: 0.3rem;
+            white-space: pre;
+        }
+
+        .code-property {
+            color: var(--primary);
+        }
+
+        .code-value {
+            color: var(--accent);
+        }
+
+        .code-comment {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+        }
+        nav {
+                text-decoration: none;
+                color: rgba(255, 255, 255, 0.85);
+                background: rgba(255, 0, 0, 0.15);
+                padding: 0.4rem 0.9rem;
+                border-radius: 20px;
+                white-space: nowrap;
+                font-size: 0.85rem;
+                transition: all 0.2s;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .controls {
+                width: 100%;
+                max-height: 400px;
+            }
+
+            .preview {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            header {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .logo-text h1 {
+                font-size: 1.2rem;
+            }
+            nav {
+                text-decoration: none;
+                color: rgba(255, 0, 0, 0.85);
+                background: rgba(255, 255, 255, 0.15);
+                padding: 0.4rem 0.9rem;
+                border-radius: 20px;
+                white-space: nowrap;
+                font-size: 0.85rem;
+                transition: all 0.2s;
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <span class="logo-icon">📝</span>
+            <div class="logo-text">
+                <h1>CSS Text Styler</h1>
+                <nav>
+                <a style="color: white;" href="index.html">← Accueil</a>
+                </nav>
+                <p>Outil de prévisualisation des propriétés textuelles</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Controls Panel -->
+        <div class="controls">
+            <div class="controls-section">
+                <div class="section-title">🔧 Paramètres Généraux</div>
+
+                <div class="control-group">
+                    <label class="control-label" for="font-family">Police de caractères</label>
+                    <select id="font-family">
+                        <option value="'Segoe UI', system-ui, sans-serif">Système (Segoe UI)</option>
+                        <option value="Arial, sans-serif">Arial</option>
+                        <option value="'Times New Roman', serif">Times New Roman</option>
+                        <option value="'Courier New', monospace">Courier New</option>
+                        <option value="Georgia, serif">Georgia</option>
+                        <option value="'Comic Sans MS', cursive">Comic Sans MS</option>
+                        <option value="Impact, sans-serif">Impact</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="font-size">Taille de police</label>
+                    <div class="range-control">
+                        <input type="range" id="font-size" min="8" max="32" value="16">
+                        <span class="range-value" id="font-size-value">16px</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="color">Couleur du texte</label>
+                    <input type="color" id="color" value="#e0e0e0">
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <div class="section-title">📜 Alignement & Espacement</div>
+
+                <div class="control-group">
+                    <label class="control-label" for="text-align">Alignement du texte</label>
+                    <select id="text-align">
+                        <option value="left">left (gauche)</option>
+                        <option value="right">right (droite)</option>
+                        <option value="center">center (centré)</option>
+                        <option value="justify">justify (justifié)</option>
+                        <option value="start">start</option>
+                        <option value="end">end</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="text-align-last">Alignement dernière ligne</label>
+                    <select id="text-align-last">
+                        <option value="auto">auto (par défaut)</option>
+                        <option value="left">left</option>
+                        <option value="right">right</option>
+                        <option value="center">center</option>
+                        <option value="justify">justify</option>
+                        <option value="start">start</option>
+                        <option value="end">end</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="text-indent">Indentation</label>
+                    <div class="range-control">
+                        <input type="range" id="text-indent" min="0" max="100" value="0">
+                        <span class="range-value" id="text-indent-value">0px</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="text-justify">Justification</label>
+                    <select id="text-justify">
+                        <option value="auto">auto (par défaut)</option>
+                        <option value="none">none</option>
+                        <option value="inter-word">inter-word</option>
+                        <option value="inter-character">inter-character</option>
+                        <option value="distribute">distribute</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="letter-spacing">Espacement des lettres</label>
+                    <div class="range-control">
+                        <input type="range" id="letter-spacing" min="-5" max="20" value="0">
+                        <span class="range-value" id="letter-spacing-value">0px</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="line-height">Hauteur de ligne</label>
+                    <div class="range-control">
+                        <input type="range" id="line-height" min="1" max="3" step="0.1" value="1.6">
+                        <span class="range-value" id="line-height-value">1.6</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <div class="section-title">✂️ Césure & Débordement</div>
+
+                <div class="control-group">
+                    <label class="control-label" for="hyphens">Césure automatique</label>
+                    <select id="hyphens">
+                        <option value="none">none (aucune)</option>
+                        <option value="manual">manual (manuelle)</option>
+                        <option value="auto">auto (automatique)</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="overflow-wrap">Gestion du débordement</label>
+                    <select id="overflow-wrap">
+                        <option value="normal">normal (par défaut)</option>
+                        <option value="break-word">break-word</option>
+                        <option value="anywhere">anywhere</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="word-break">Césure des mots</label>
+                    <select id="word-break">
+                        <option value="normal">normal (par défaut)</option>
+                        <option value="break-all">break-all</option>
+                        <option value="keep-all">keep-all</option>
+                        <option value="break-word">break-word</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="line-break">Règles de césure</label>
+                    <select id="line-break">
+                        <option value="auto">auto (par défaut)</option>
+                        <option value="loose">loose</option>
+                        <option value="normal">normal</option>
+                        <option value="strict">strict</option>
+                        <option value="anywhere">anywhere</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="controls-section">
+                <div class="section-title">🔤 Transformation & Espace</div>
+
+                <div class="control-group">
+                    <label class="control-label" for="text-transform">Transformation du texte</label>
+                    <select id="text-transform">
+                        <option value="none">none (aucune)</option>
+                        <option value="capitalize">capitalize (majuscule 1ère lettre)</option>
+                        <option value="uppercase">uppercase (majuscules)</option>
+                        <option value="lowercase">lowercase (minuscules)</option>
+                        <option value="full-width">full-width</option>
+                        <option value="full-size-kana">full-size-kana</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="white-space">Gestion des espaces</label>
+                    <select id="white-space">
+                        <option value="normal">normal (par défaut)</option>
+                        <option value="nowrap">nowrap</option>
+                        <option value="pre">pre</option>
+                        <option value="pre-wrap">pre-wrap</option>
+                        <option value="pre-line">pre-line</option>
+                        <option value="break-spaces">break-spaces</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="tab-size">Taille des tabulations</label>
+                    <div class="range-control">
+                        <input type="range" id="tab-size" min="0" max="16" value="8">
+                        <span class="range-value" id="tab-size-value">8</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label" for="hanging-punctuation">Ponctuation suspendue</label>
+                    <select id="hanging-punctuation">
+                        <option value="none">none (aucune)</option>
+                        <option value="first">first</option>
+                        <option value="last">last</option>
+                        <option value="allow-end">allow-end</option>
+                        <option value="force-end">force-end</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <button class="btn-reset" id="reset-btn">Réinitialiser tous les paramètres</button>
+            </div>
+        </div>
+
+        <!-- Preview Panel -->
+        <div class="preview">
+            <div class="preview-header">
+                <div class="preview-title">👁️ Prévisualisation</div>
+                <div class="preview-subtitle">Modifiez les paramètres pour voir les changements en temps réel</div>
+            </div>
+
+            <div class="preview-content">
+                <div class="sample-text" id="preview-text">
+                    <p class="hanging-preview">« Voici un exemple de texte qui démontre les différentes propriétés CSS textuelles. Ce paragraphe contient suffisamment de mots pour montrer comment les propriétés comme hyphens, overflow-wrap et text-align fonctionnent en pratique.</p>
+
+                    <p class="hyphen-preview">Dans ce conteneur étroit, vous pouvez voir comment les mots sont coupés avec la propriété hyphens. Supercalifragilisticexpialidocious est un mot particulièrement long qui montre bien l'effet.</p>
+
+                    <p class="tab-preview">Voici    un    texte    avec    des    tabulations    pour    montrer    l'effet    de    tab-size:
+                    Première ligne    avec    tabulation
+                    Deuxième    ligne    avec    plusieurs    tabulations</p>
+
+                    <p class="overflow-preview">Ce paragraphe est dans un conteneur très étroit pour démontrer overflow-wrap et word-break avec un mot très long: Anticonstitutionnellement.</p>
+
+                    <p>Voici un texte avec différentes transformations: "this text will be transformed" et "THIS TEXT TOO". La ponctuation peut être suspendue comme dans cet exemple: "Voici une citation avec ponctuation suspendue."</p>
+                </div>
+            </div>
+
+            <div class="code-panel">
+                <div class="code-line"><span class="code-comment">/* CSS généré automatiquement */</span></div>
+                <div class="code-line"><span class="code-selector">.text-element</span> {</div>
+                <div class="code-line" id="code-font-family">&nbsp;&nbsp;font-family: <span class="code-value">'Segoe UI', system-ui, sans-serif</span>;</div>
+                <div class="code-line" id="code-font-size">&nbsp;&nbsp;font-size: <span class="code-value">16px</span>;</div>
+                <div class="code-line" id="code-color">&nbsp;&nbsp;color: <span class="code-value">#e0e0e0</span>;</div>
+                <div class="code-line" id="code-text-align">&nbsp;&nbsp;text-align: <span class="code-value">left</span>;</div>
+                <div class="code-line" id="code-text-align-last">&nbsp;&nbsp;text-align-last: <span class="code-value">auto</span>;</div>
+                <div class="code-line" id="code-text-indent">&nbsp;&nbsp;text-indent: <span class="code-value">0px</span>;</div>
+                <div class="code-line" id="code-text-justify">&nbsp;&nbsp;text-justify: <span class="code-value">auto</span>;</div>
+                <div class="code-line" id="code-letter-spacing">&nbsp;&nbsp;letter-spacing: <span class="code-value">0px</span>;</div>
+                <div class="code-line" id="code-line-height">&nbsp;&nbsp;line-height: <span class="code-value">1.6</span>;</div>
+                <div class="code-line" id="code-hyphens">&nbsp;&nbsp;hyphens: <span class="code-value">none</span>;</div>
+                <div class="code-line" id="code-overflow-wrap">&nbsp;&nbsp;overflow-wrap: <span class="code-value">normal</span>;</div>
+                <div class="code-line" id="code-word-break">&nbsp;&nbsp;word-break: <span class="code-value">normal</span>;</div>
+                <div class="code-line" id="code-line-break">&nbsp;&nbsp;line-break: <span class="code-value">auto</span>;</div>
+                <div class="code-line" id="code-text-transform">&nbsp;&nbsp;text-transform: <span class="code-value">none</span>;</div>
+                <div class="code-line" id="code-white-space">&nbsp;&nbsp;white-space: <span class="code-value">normal</span>;</div>
+                <div class="code-line" id="code-tab-size">&nbsp;&nbsp;tab-size: <span class="code-value">8</span>;</div>
+                <div class="code-line" id="code-hanging-punctuation">&nbsp;&nbsp;hanging-punctuation: <span class="code-value">none</span>;</div>
+                <div class="code-line">}</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2023 CSS Text Styler - Outil de prévisualisation des propriétés textuelles CSS</p>
+    </footer>
+
+    <script>
+        // DOM Elements
+        const previewText = document.getElementById('preview-text');
+        const codeElements = {
+            fontFamily: document.getElementById('code-font-family'),
+            fontSize: document.getElementById('code-font-size'),
+            color: document.getElementById('code-color'),
+            textAlign: document.getElementById('code-text-align'),
+            textAlignLast: document.getElementById('code-text-align-last'),
+            textIndent: document.getElementById('code-text-indent'),
+            textJustify: document.getElementById('code-text-justify'),
+            letterSpacing: document.getElementById('code-letter-spacing'),
+            lineHeight: document.getElementById('code-line-height'),
+            hyphens: document.getElementById('code-hyphens'),
+            overflowWrap: document.getElementById('code-overflow-wrap'),
+            wordBreak: document.getElementById('code-word-break'),
+            lineBreak: document.getElementById('code-line-break'),
+            textTransform: document.getElementById('code-text-transform'),
+            whiteSpace: document.getElementById('code-white-space'),
+            tabSize: document.getElementById('code-tab-size'),
+            hangingPunctuation: document.getElementById('code-hanging-punctuation')
+        };
+
+        // Controls
+        const controls = {
+            fontFamily: document.getElementById('font-family'),
+            fontSize: document.getElementById('font-size'),
+            fontSizeValue: document.getElementById('font-size-value'),
+            color: document.getElementById('color'),
+            textAlign: document.getElementById('text-align'),
+            textAlignLast: document.getElementById('text-align-last'),
+            textIndent: document.getElementById('text-indent'),
+            textIndentValue: document.getElementById('text-indent-value'),
+            textJustify: document.getElementById('text-justify'),
+            letterSpacing: document.getElementById('letter-spacing'),
+            letterSpacingValue: document.getElementById('letter-spacing-value'),
+            lineHeight: document.getElementById('line-height'),
+            lineHeightValue: document.getElementById('line-height-value'),
+            hyphens: document.getElementById('hyphens'),
+            overflowWrap: document.getElementById('overflow-wrap'),
+            wordBreak: document.getElementById('word-break'),
+            lineBreak: document.getElementById('line-break'),
+            textTransform: document.getElementById('text-transform'),
+            whiteSpace: document.getElementById('white-space'),
+            tabSize: document.getElementById('tab-size'),
+            tabSizeValue: document.getElementById('tab-size-value'),
+            hangingPunctuation: document.getElementById('hanging-punctuation'),
+            resetBtn: document.getElementById('reset-btn')
+        };
+
+        // Initialize
+        function init() {
+            // Set up event listeners
+            controls.fontFamily.addEventListener('input', updateStyles);
+            controls.fontSize.addEventListener('input', updateStyles);
+            controls.color.addEventListener('input', updateStyles);
+            controls.textAlign.addEventListener('input', updateStyles);
+            controls.textAlignLast.addEventListener('input', updateStyles);
+            controls.textIndent.addEventListener('input', updateStyles);
+            controls.textJustify.addEventListener('input', updateStyles);
+            controls.letterSpacing.addEventListener('input', updateStyles);
+            controls.lineHeight.addEventListener('input', updateStyles);
+            controls.hyphens.addEventListener('input', updateStyles);
+            controls.overflowWrap.addEventListener('input', updateStyles);
+            controls.wordBreak.addEventListener('input', updateStyles);
+            controls.lineBreak.addEventListener('input', updateStyles);
+            controls.textTransform.addEventListener('input', updateStyles);
+            controls.whiteSpace.addEventListener('input', updateStyles);
+            controls.tabSize.addEventListener('input', updateStyles);
+            controls.hangingPunctuation.addEventListener('input', updateStyles);
+            controls.resetBtn.addEventListener('click', resetStyles);
+
+            // Update value displays
+            controls.fontSize.addEventListener('input', () => {
+                controls.fontSizeValue.textContent = `${controls.fontSize.value}px`;
+            });
+
+            controls.textIndent.addEventListener('input', () => {
+                controls.textIndentValue.textContent = `${controls.textIndent.value}px`;
+            });
+
+            controls.letterSpacing.addEventListener('input', () => {
+                controls.letterSpacingValue.textContent = `${controls.letterSpacing.value}px`;
+            });
+
+            controls.lineHeight.addEventListener('input', () => {
+                controls.lineHeightValue.textContent = controls.lineHeight.value;
+            });
+
+            controls.tabSize.addEventListener('input', () => {
+                controls.tabSizeValue.textContent = controls.tabSize.value;
+            });
+
+            // Initial update
+            updateStyles();
+        }
+
+        // Update all styles
+        function updateStyles() {
+            // Update preview text styles
+            previewText.style.fontFamily = controls.fontFamily.value;
+            previewText.style.fontSize = `${controls.fontSize.value}px`;
+            previewText.style.color = controls.color.value;
+            previewText.style.textAlign = controls.textAlign.value;
+            previewText.style.textAlignLast = controls.textAlignLast.value;
+            previewText.style.textIndent = `${controls.textIndent.value}px`;
+            previewText.style.textJustify = controls.textJustify.value;
+            previewText.style.letterSpacing = `${controls.letterSpacing.value}px`;
+            previewText.style.lineHeight = controls.lineHeight.value;
+            previewText.style.hyphens = controls.hyphens.value;
+            previewText.style.overflowWrap = controls.overflowWrap.value;
+            previewText.style.wordBreak = controls.wordBreak.value;
+            previewText.style.lineBreak = controls.lineBreak.value;
+            previewText.style.textTransform = controls.textTransform.value;
+            previewText.style.whiteSpace = controls.whiteSpace.value;
+            previewText.style.tabSize = controls.tabSize.value;
+            previewText.style.hangingPunctuation = controls.hangingPunctuation.value;
+
+            // Update code display
+            codeElements.fontFamily.innerHTML = `&nbsp;&nbsp;font-family: <span class="code-value">${controls.fontFamily.value}</span>;`;
+            codeElements.fontSize.innerHTML = `&nbsp;&nbsp;font-size: <span class="code-value">${controls.fontSize.value}px</span>;`;
+            codeElements.color.innerHTML = `&nbsp;&nbsp;color: <span class="code-value">${controls.color.value}</span>;`;
+            codeElements.textAlign.innerHTML = `&nbsp;&nbsp;text-align: <span class="code-value">${controls.textAlign.value}</span>;`;
+            codeElements.textAlignLast.innerHTML = `&nbsp;&nbsp;text-align-last: <span class="code-value">${controls.textAlignLast.value}</span>;`;
+            codeElements.textIndent.innerHTML = `&nbsp;&nbsp;text-indent: <span class="code-value">${controls.textIndent.value}px</span>;`;
+            codeElements.textJustify.innerHTML = `&nbsp;&nbsp;text-justify: <span class="code-value">${controls.textJustify.value}</span>;`;
+            codeElements.letterSpacing.innerHTML = `&nbsp;&nbsp;letter-spacing: <span class="code-value">${controls.letterSpacing.value}px</span>;`;
+            codeElements.lineHeight.innerHTML = `&nbsp;&nbsp;line-height: <span class="code-value">${controls.lineHeight.value}</span>;`;
+            codeElements.hyphens.innerHTML = `&nbsp;&nbsp;hyphens: <span class="code-value">${controls.hyphens.value}</span>;`;
+            codeElements.overflowWrap.innerHTML = `&nbsp;&nbsp;overflow-wrap: <span class="code-value">${controls.overflowWrap.value}</span>;`;
+            codeElements.wordBreak.innerHTML = `&nbsp;&nbsp;word-break: <span class="code-value">${controls.wordBreak.value}</span>;`;
+            codeElements.lineBreak.innerHTML = `&nbsp;&nbsp;line-break: <span class="code-value">${controls.lineBreak.value}</span>;`;
+            codeElements.textTransform.innerHTML = `&nbsp;&nbsp;text-transform: <span class="code-value">${controls.textTransform.value}</span>;`;
+            codeElements.whiteSpace.innerHTML = `&nbsp;&nbsp;white-space: <span class="code-value">${controls.whiteSpace.value}</span>;`;
+            codeElements.tabSize.innerHTML = `&nbsp;&nbsp;tab-size: <span class="code-value">${controls.tabSize.value}</span>;`;
+            codeElements.hangingPunctuation.innerHTML = `&nbsp;&nbsp;hanging-punctuation: <span class="code-value">${controls.hangingPunctuation.value}</span>;`;
+        }
+
+        // Reset all styles
+        function resetStyles() {
+            controls.fontFamily.value = "'Segoe UI', system-ui, sans-serif";
+            controls.fontSize.value = 16;
+            controls.fontSizeValue.textContent = '16px';
+            controls.color.value = '#e0e0e0';
+            controls.textAlign.value = 'left';
+            controls.textAlignLast.value = 'auto';
+            controls.textIndent.value = 0;
+            controls.textIndentValue.textContent = '0px';
+            controls.textJustify.value = 'auto';
+            controls.letterSpacing.value = 0;
+            controls.letterSpacingValue.textContent = '0px';
+            controls.lineHeight.value = 1.6;
+            controls.lineHeightValue.textContent = '1.6';
+            controls.hyphens.value = 'none';
+            controls.overflowWrap.value = 'normal';
+            controls.wordBreak.value = 'normal';
+            controls.lineBreak.value = 'auto';
+            controls.textTransform.value = 'none';
+            controls.whiteSpace.value = 'normal';
+            controls.tabSize.value = 8;
+            controls.tabSizeValue.textContent = '8';
+            controls.hangingPunctuation.value = 'none';
+
+            updateStyles();
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
